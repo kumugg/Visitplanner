@@ -49,10 +49,7 @@ session_start();
                             <a class="nav-link <?php echo ($page == 'places') ? 'active' : ''  ?> text-light" href="index.php?category=all">Places</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link <?php echo ($page == 'map') ? 'active' : ''  ?> text-light" href="map.php">Map</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo ($page == 'myvisitplan') ? 'active' : ''  ?> text-light" href="visit_plan.php">My Visit Plan</a>
+                            <a class="nav-link <?php echo ($page == 'myvisitplan') ? 'active' : ''  ?> text-light" href="my_visit_plan.php">My Visit Plan</a>
                         </li>
                         <div class="ms-5 d-flex">
                             <li class="nav-item">

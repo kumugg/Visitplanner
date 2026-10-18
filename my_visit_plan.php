@@ -25,8 +25,7 @@ foreach ($place_ids as $place_id) {
 ?>
 
 <div class="container py-4">
-    <h2>My Visit Plan Map</h2>
-    <p class="text-muted">Select a place or marker to view its details.</p>
+    <h2>My Visit Plan</h2>
     <div class="row g-4">
         <aside class="col-12 col-md-4">
             <h3 class="fs-5">Places in your plan</h3>
@@ -42,6 +41,7 @@ foreach ($place_ids as $place_id) {
                             <?php if ($place['latitude'] === null || $place['longitude'] === null): ?>
                                 <small class="d-block text-muted">Location coordinates not available</small>
                             <?php endif; ?>
+                            <button class="btn btn-sm btn-outline-danger float-end" onclick="if(confirm('Are you sure you want to remove this place from your visit plan?')) { window.location.href='visit_plan.php?place_id=<?= (int) $place['place_id'] ?>'; }">Remove</button>
                         </li>
                     <?php endforeach; ?>
                 </ul>

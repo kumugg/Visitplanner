@@ -8,17 +8,6 @@ $places_by_id = [];
 $visitplan_sess_var = $_SESSION['visit_plan'] ?? null;
 $remove_visit_item = $_GET['place_id'] ?? null;
 
-if ($remove_visit_item !== null && isset($_SESSION['visit_plan'])) {
-    $remove_id = intval($remove_visit_item);
-    $key = array_search($remove_id, $_SESSION['visit_plan']);
-    if ($key !== false) {
-        unset($_SESSION['visit_plan'][$key]);
-        $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']);
-    }
-    header("Location: visit_plan.php");
-    exit;
-}
-
 if (!empty($place_ids)) {
     $placeholders = implode(',', array_fill(0, count($place_ids), '?'));
     $sql = "SELECT place_id, place_name, latitude, longitude FROM place WHERE place_id IN ($placeholders)";
