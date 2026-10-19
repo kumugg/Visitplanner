@@ -25,10 +25,9 @@ foreach ($place_ids as $place_id) {
 ?>
 
 <div class="container py-4">
-    <h2>My Visit Plan</h2>
     <div class="row g-4">
         <aside class="col-12 col-md-4">
-            <h3 class="fs-5">Places in your plan</h3>
+            <h2 class="mb-5">Place in My Visit Plan</h2>
             <?php if (empty($places)): ?>
                 <p class="text-muted">Your visit plan is empty.</p>
             <?php else: ?>
@@ -47,7 +46,7 @@ foreach ($place_ids as $place_id) {
                 </ul>
             <?php endif; ?>
         </aside>
-        <section class="col-12 col-md-8" aria-label="Map of visit plan places">
+        <section class="col-12 col-md-8 mt-5" aria-label="Map of visit plan places">
             <div id="map" style="height: 560px; width: 100%;"></div>
             <p id="map-message" class="small text-muted mt-2 mb-0" hidden>No visit plan places have map coordinates yet.</p>
         </section>

@@ -32,6 +32,11 @@ session_start();
             }
         }
 
+        // Initialize the visit plan session variable if it doesn't exist
+        if (!isset($_SESSION['visit_plan'])) {
+            $_SESSION['visit_plan'] = [];
+        }
+
         ?>
         <nav class="navbar navbar-expand-lg bg-<?= $theme_color ?>">
             <div class="container-md">

@@ -3,10 +3,11 @@ require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
 $page = "place_details";
 
-$place_id = $_GET['place_id'];
+$selected_place_id = $_GET['place_id'] ?? null;
+$is_added_to_vistiplan = in_array($selected_place_id, $_SESSION['visit_plan']);
 
 $sql = "SELECT p.place_name, p.place_description, p.opening_time, p.travel_tip, p.distance_km, p.image_path, c.category_name FROM place p INNER JOIN category c ON c.category_id = p.category_id WHERE place_id = ?";
-$result = $conn->execute_query($sql, [$place_id]);
+$result = $conn->execute_query($sql, [$selected_place_id]);
 
 if ($result && $result->num_rows == 1) {
     $row = $result->fetch_assoc();
@@ -21,18 +22,20 @@ if ($result && $result->num_rows == 1) {
     echo "Place not found.";
 }
 
-
+// Handle adding a place to the visit plan
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $action = $_POST['action'] ?? null;
 
-    $visitplan_place_id = $_POST['place_id'];
-
-    if(isset($visitplan_place_id)) {
-        $plan_pid = intval($visitplan_place_id);
-        if(!isset($_SESSION['visit_plan'])) {
-            $_SESSION['visit_plan'] = [];
+    if ($action === 'add') {
+        if (!in_array($selected_place_id, $_SESSION['visit_plan'])) {
+            $_SESSION['visit_plan'][] = $selected_place_id;
+            $is_added_to_vistiplan = true;
         }
-        if(!in_array($plan_pid, $_SESSION['visit_plan'])) {
-            $_SESSION['visit_plan'][] = $plan_pid;
+    } else if ($action === 'remove') {
+        if (($key = array_search($selected_place_id, $_SESSION['visit_plan']) == true)) {
+            unset($_SESSION['visit_plan'][$key]);
+            $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']); // Reindex the array
+            $is_added_to_vistiplan = false;
         }
     }
 }
@@ -98,15 +101,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </li>
             </ul>
             <form action="#" method="post">
-                <input type="hidden" name="place_id" value="<?= htmlspecialchars($place_id); ?>">
-                <button type="submit" class="btn btn-outline-<?= $theme_color ?> ms-3 mt-4"> Add to visit plan</button>
+                <?php 
+                 if (!$is_added_to_vistiplan) {
+                    echo '<button type="submit" name="action" value="add" class="btn btn-outline-' . $theme_color . ' ms-3 mt-4"> Add to visit plan</button>';
+                 } else {
+                    echo '<button type="submit" name="action" value="remove" class="btn btn-outline-' . $theme_color . ' ms-3 mt-4"> Remove from visit plan</button>';
+                 }
+                 ?>
                 <a href="#" class="btn btn-outline-<?= $theme_color ?> ms-4 mt-4"> View on Map</a>
             </form>
         </div>
     </div>
 </div>
 
-
 <?php 
-include __DIR__ . '/includes/footer.php'
+include __DIR__ . '/includes/footer.php';
 ?>
