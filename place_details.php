@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     echo '<button type="submit" name="action" value="remove" class="btn btn-outline-' . $theme_color . ' ms-3 mt-4"> Remove from visit plan</button>';
                  }
                  ?>
-                <a href="#" class="btn btn-outline-<?= $theme_color ?> ms-4 mt-4"> View on Map</a>
+                <a href="my_visit_plan.php" class="btn btn-outline-<?= $theme_color ?> ms-4 mt-4"> View on Map</a>
             </form>
         </div>
     </div>

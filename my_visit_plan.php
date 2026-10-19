@@ -2,11 +2,11 @@
 require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
 $page = "map";
-$place_ids = array_values(array_unique(array_map('intval', $_SESSION['visit_plan'] ?? [])));
-$places_by_id = [];
+$place_ids = array_values(array_unique(array_map('intval', $_SESSION['visit_plan'] ?? [])));        // Get the session array values by making it integer, unique and in order.
+$places_by_id = [];     // 0 => ['place_id' => 42, 'place_name' => 'Sigiriya', 'latitude' => 7.95, 'longitude' => 80.75] as array
 
 if (!empty($place_ids)) {
-    $placeholders = implode(',', array_fill(0, count($place_ids), '?'));
+    $placeholders = implode(',', array_fill(0, count($place_ids), '?'));        // Using ? mark on sql command according to the value count on session array.
     $sql = "SELECT place_id, place_name, latitude, longitude FROM place WHERE place_id IN ($placeholders)";
     $result = $conn->execute_query($sql, $place_ids);
 
@@ -19,6 +19,21 @@ $places = [];
 foreach ($place_ids as $place_id) {
     if (isset($places_by_id[$place_id])) {
         $places[] = $places_by_id[$place_id];
+    }
+}
+
+if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
+    $pid = (int) $_GET['place_id'];
+
+    if (!empty($_SESSION['visit_plan'])) {
+        $key = array_search($pid, $_SESSION['visit_plan']);
+
+        if ($key !== false) {
+            unset($_SESSION['visit_plan'][$key]);
+            $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']);
+            header("Location: " . strtok($_SERVER['REQUEST_URI'], '?'));        // Remove the content after the ? mark on URI
+            exit();
+        }
     }
 }
 
@@ -40,7 +55,7 @@ foreach ($place_ids as $place_id) {
                             <?php if ($place['latitude'] === null || $place['longitude'] === null): ?>
                                 <small class="d-block text-muted">Location coordinates not available</small>
                             <?php endif; ?>
-                            <button class="btn btn-sm btn-outline-danger float-end" onclick="if(confirm('Are you sure you want to remove this place from your visit plan?')) { window.location.href='visit_plan.php?place_id=<?= (int) $place['place_id'] ?>'; }">Remove</button>
+                            <a class="btn btn-sm btn-outline-danger float-end" href="?place_id=<?= htmlspecialchars($place['place_id']) ?>&remove=true">Remove</a>
                         </li>
                     <?php endforeach; ?>
                 </ul>
