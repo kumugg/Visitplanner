@@ -31,7 +31,7 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
         if ($key !== false) {
             unset($_SESSION['visit_plan'][$key]);
             $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']);
-            header("Location: " . strtok($_SERVER['REQUEST_URI'], '?'));        // Remove the content after the ? mark on URI
+            header("Location: " . strtok($_SERVER['REQUEST_URI'], '?'));        // Remove the content after the ? mark on URI without manually typing the php file name.
             exit();
         }
     }
@@ -70,45 +70,60 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
 <script>
     let map;
     document.addEventListener("DOMContentLoaded", function() {
-        const places = <?= json_encode(array_map(static function ($place) {
+        // 1. Wrap PHP output in array_values() to guarantee a valid JavaScript array
+        const places = <?= json_encode(array_values(array_map(static function ($place) {
             return [
                 'id' => (int) $place['place_id'],
                 'name' => $place['place_name'],
                 'latitude' => $place['latitude'] === null ? null : (float) $place['latitude'],
                 'longitude' => $place['longitude'] === null ? null : (float) $place['longitude'],
             ];
-        }, $places), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
+        }, $places ?? [])), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
 
         map = L.map('map').setView([6.9271, 79.8612], 8);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+        // 2. Custom HTML sanitizer replacing non-existent L.Util.escapeHTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         const bounds = [];
         places.forEach(function(place) {
+            // Skip places with missing/null coordinates
             if (place.latitude === null || place.longitude === null) {
                 return;
             }
+
             const position = [place.latitude, place.longitude];
+            
             L.marker(position)
                 .addTo(map)
                 .bindPopup('<a href="place_details.php?place_id=' + place.id + '">' +
-                    L.Util.escapeHTML(place.name) + '</a>');
+                    escapeHtml(place.name) + '</a>');
+                    
             bounds.push(position);
         });
 
         if (bounds.length > 0) {
             map.fitBounds(bounds, { padding: [24, 24], maxZoom: 14 });
         } else {
-            document.getElementById('map-message').hidden = false;
+            const mapMsg = document.getElementById('map-message');
+            if (mapMsg) mapMsg.hidden = false;
         }
     });
 
     function panToLocation(lat, lng) {
-        map.flyTo([lat, lng], 14, {
-            animate: true,
-            duration: 1.5
-        });
+        if (map) {
+            map.flyTo([lat, lng], 14, {
+                animate: true,
+                duration: 1.5
+            });
+        }
     }
 </script>
 
