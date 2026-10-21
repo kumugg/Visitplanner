@@ -4,6 +4,7 @@ require_once __DIR__ . '/includes/db.php';
 $page = "login";
 $error_msg = '';
 
+// if user is already logged in, redirect to visit_plan.php
 if(isset($_SESSION['logged_in_username'])) {
     header("Location: visit_plan.php");
 }

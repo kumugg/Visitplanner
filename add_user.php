@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
+include __DIR__ . '/includes/admins_only.php';
+
 $page = "manage_users";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

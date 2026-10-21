@@ -1,11 +1,7 @@
 <?php
 include __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
-
-if (!isset($_SESSION['logged_in_username'])) {
-    header("Location: login.php");
-    exit();
-}
+include __DIR__ . '/includes/admins_only.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $place_id = $_POST['place_id'];

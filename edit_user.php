@@ -1,12 +1,7 @@
 <?php
-
 require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
-
-if ($_SESSION['user_type'] !== 'admin') {
-    header("Location: index.php");
-    exit;
-}
+include __DIR__ . '/includes/admins_only.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_POST['user_id'];
