@@ -58,12 +58,24 @@ if (!$place) {
                             <textarea class="form-control" id="place_description" name="place_description" rows="3" required><?= htmlspecialchars($place['place_description']); ?></textarea>
                         </div>
                         <div class="mb-3">
+                            <label for="distance_km" class="form-label">Distance (km)</label>
+                            <input type="text" class="form-control" id="distance_km" name="distance_km" value="<?= htmlspecialchars($place['distance_km']); ?>" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="travel_tip" class="form-label">Travel Tip</label>
+                            <textarea class="form-control" id="travel_tip" name="travel_tip" rows="3"><?= htmlspecialchars($place['travel_tip']); ?></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="opening_time" class="form-label">Opening Time</label>
+                            <input type="text" class="form-control" id="opening_time" name="opening_time" value="<?= htmlspecialchars($place['distance_km']); ?>" >
+                        </div>
+                        <div class="mb-3">
                             <label for="latitude" class="form-label">Latitude</label>
-                            <input type="text" class="form-control" id="latitude" name="latitude" value="<?= htmlspecialchars($place['latitude']); ?>" required>
+                            <input type="text" class="form-control" id="latitude" name="latitude" value="<?= htmlspecialchars($place['latitude']); ?>" >
                         </div>
                         <div class="mb-3">
                             <label for="longitude" class="form-label">Longitude</label>
-                            <input type="text" class="form-control" id="longitude" name="longitude" value="<?= htmlspecialchars($place['longitude']); ?>" required>
+                            <input type="text" class="form-control" id="longitude" name="longitude" value="<?= htmlspecialchars($place['longitude']); ?>" >
                         </div>
                         <button type="submit" class="btn btn-<?= $theme_color ?> w-100">Update Place</button>
                     </form>

@@ -8,9 +8,9 @@ $is_added_to_vistiplan = in_array($selected_place_id, $_SESSION['visit_plan']);
 
 $sql = "SELECT p.place_name, p.place_description, p.opening_time, p.travel_tip, p.distance_km, p.image_path, c.category_name FROM place p INNER JOIN category c ON c.category_id = p.category_id WHERE place_id = ?";
 $result = $conn->execute_query($sql, [$selected_place_id]);
+$row = $result->fetch_assoc();
 
-if ($result && $result->num_rows == 1) {
-    $row = $result->fetch_assoc();
+if ($row) {
     $place_name        = htmlspecialchars($row['place_name']);
     $place_description = htmlspecialchars($row['place_description']);
     $opening_time      = htmlspecialchars($row['opening_time']);
@@ -18,6 +18,7 @@ if ($result && $result->num_rows == 1) {
     $distance_km       = htmlspecialchars($row['distance_km']);
     $image_path        = htmlspecialchars($row['image_path']);
     $category_name     = htmlspecialchars($row['category_name']);
+    
 } else {
     echo "Place not found.";
 }
