@@ -31,8 +31,8 @@ $page = "manage_users";
                             $result = $conn->execute_query($sql);
                             while ($row = $result->fetch_assoc()): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                    <td><?= htmlspecialchars($row['user_type'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?= htmlspecialchars($row['username']); ?></td>
+                                    <td><?= htmlspecialchars($row['user_type']  ); ?></td>
                                     <td>
                                         <a href="edit_user.php?user_id=<?= urlencode($row['user_id']); ?>" class="btn btn-sm btn-outline-primary">Edit</a>
                                         <a href="delete_user.php?user_id=<?= urlencode($row['user_id']); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>

@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "INSERT INTO users (username, password_hash, user_type) VALUES (?, ?, ?)";
         $result = $conn->execute_query($sql, [$username, $hashed_password, $user_type]);
         if ($result) {
-            echo '<div class="container mt-4"><p class="fs-2 fw-semibold">User added successfully.</p></div>';
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotification(); }); </script>';
         } else {
             echo '<div class="container mt-4"><p class="fs-2 fw-semibold">Error adding user: ' . htmlspecialchars($conn->error) . '</p></div>';
         }
@@ -24,6 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+<div id="toast" class="toast-bar">
+        User added successfully!
+</div>
 
 <div class="container py-5">
     <div class="row justify-content-center mb-5">
@@ -59,6 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
+<script> 
+    function triggerNotification() {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+</script>
 
 <?php
 include __DIR__ . '/includes/footer.php';

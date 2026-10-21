@@ -3,3 +3,29 @@
     width: 100%;        
     object-fit: cover; 
 }
+
+.toast-bar {
+    visibility: hidden;
+    min-width: 280px;
+    background-color: #2e7d32; /* Success green */
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 14px 20px;
+    position: fixed;
+    z-index: 1000;
+    top: 20px;
+    right: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(-20px);
+}
+
+.toast-bar.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
