@@ -5,6 +5,20 @@ include __DIR__ . '/../includes/admins_only.php';
 $page = "manage_users";
 
 
+if (isset($_GET['user_id']) && $_GET['delete'] === 'true') {
+    $user_id = $_GET['user_id'];
+
+    // Delete the user from the database
+    $sql = "DELETE FROM users WHERE user_id = ?";
+    $result = $conn->execute_query($sql, [$user_id]);
+
+    if ($result) {
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User deleted successfully!"); }); </script>';
+    } else {
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error deleting user: ' . htmlspecialchars($conn->error) . '"); }); </script>';
+    }
+}
+
 ?>
 
 <div class="container py-5">

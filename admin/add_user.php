@@ -10,20 +10,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $user_type = $_POST['user_type'] ?? '';
 
+    $sql = "SELECT user_id FROM users WHERE username = ?";
+    $result = $conn->execute_query($sql, [$username]);
+    $user_exists = !empty($result->fetch_assoc());
+
     if (!empty($username) && !empty($password) && !empty($user_type)) {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO users (username, password_hash, user_type) VALUES (?, ?, ?)";
-        try {
+        
+        if ($user_exists) {
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("User already exists."); }); </script>';
+        } 
+        else {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $sql = "INSERT INTO users (username, password_hash, user_type) VALUES (?, ?, ?)";
+            try {
             $result = $conn->execute_query($sql, [$username, $hashed_password, $user_type]);
+
             if ($result) {
                 echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User added successfully!"); }); </script>';
-            } else {
+            } 
+            else {
                 echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error adding user: ' . htmlspecialchars($conn->error) . '"); }); </script>';
             }
-        } catch (Exception $e) {
-            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error adding user: ' . htmlspecialchars($e->getMessage()) . '"); }); </script>';
-        }
 
+            } catch (Exception $e) {
+                echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error adding user: ' . htmlspecialchars($e->getMessage()) . '"); }); </script>';
+            }
+        }
     } else {
         echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("All fields are required."); }); </script>';
     }
