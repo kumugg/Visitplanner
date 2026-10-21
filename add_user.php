@@ -13,20 +13,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($username) && !empty($password) && !empty($user_type)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $sql = "INSERT INTO users (username, password_hash, user_type) VALUES (?, ?, ?)";
-        $result = $conn->execute_query($sql, [$username, $hashed_password, $user_type]);
-        if ($result) {
-            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotification(); }); </script>';
-        } else {
-            echo '<div class="container mt-4"><p class="fs-2 fw-semibold">Error adding user: ' . htmlspecialchars($conn->error) . '</p></div>';
+        try {
+            $result = $conn->execute_query($sql, [$username, $hashed_password, $user_type]);
+            if ($result) {
+                echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User added successfully!"); }); </script>';
+            } else {
+                echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error adding user: ' . htmlspecialchars($conn->error) . '"); }); </script>';
+            }
+        } catch (Exception $e) {
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error adding user: ' . htmlspecialchars($e->getMessage()) . '"); }); </script>';
         }
+
     } else {
-        echo '<div class="container mt-4"><p class="fs-2 fw-semibold">All fields are required.</p></div>';
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("All fields are required."); }); </script>';
     }
 }
 ?>
-<div id="toast" class="toast-bar">
-        User added successfully!
-</div>
 
 <div class="container py-5">
     <div class="row justify-content-center mb-5">
@@ -62,15 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
-<script> 
-    function triggerNotification() {
-        const toast = document.getElementById('toast');
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
-    }
-</script>
 
 <?php
 include __DIR__ . '/includes/footer.php';

@@ -22,17 +22,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['logged_in_username'] = $username;
                 $_SESSION['user_type'] = $row['user_type'];
 
-                if($row['user_type'] == 'admin') {
+                if ($row['user_type'] == 'admin') {
                     header("Location: admin_dashboard.php");
                 } else {
                     header("Location: my_visitplan.php");
                 }
 
-                } else {
-                $error_msg = "Wrong Password...";
+            } else {
+                echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Invalid username or password."); }); </script>';
             }
+        
         } else {
-            $error_msg = "User is not found...";
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Invalid username or password."); }); </script>';
         }
     }
 }
@@ -48,14 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="col-md-4 col-sm-6">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
-                    <div>
-                        <?php if(!empty($error_msg)): ?>
-                            <div class="alert alert-danger alert-dismissible fade show py-2 mb-3 d-flex align-items-center justify-content-between" role="alert">
-                                <?= htmlspecialchars($error_msg) ?>
-                                <button type="button" class="btn-close m-0" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        <?php endif; ?>
-                    </div>
                     <form action="" method="post" id="loginForm">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>

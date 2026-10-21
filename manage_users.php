@@ -3,6 +3,8 @@ require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/admins_only.php';
 $page = "manage_users";
+
+
 ?>
 
 <div class="container py-5">
@@ -35,7 +37,7 @@ $page = "manage_users";
                                     <td><?= htmlspecialchars($row['user_type']  ); ?></td>
                                     <td>
                                         <a href="edit_user.php?user_id=<?= urlencode($row['user_id']); ?>" class="btn btn-sm btn-outline-primary">Edit</a>
-                                        <a href="delete_user.php?user_id=<?= urlencode($row['user_id']); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                        <a href="#?user_id=<?= urlencode($row['user_id']); ?>&delete=true" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

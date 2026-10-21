@@ -73,3 +73,4 @@ session_start();
                 </div>
             </div>
         </nav>
+        <div id="toast" class="toast-bar"></div>

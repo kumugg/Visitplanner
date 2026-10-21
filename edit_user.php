@@ -18,9 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($stmt) {
-        echo '<div class="container mt-4"><p class="fs-2 fw-semibold">User updated successfully.</p></div>';
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User updated successfully!"); }); </script>';
     } else {
-        echo '<div class="container mt-4"><p class="fs-2 fw-semibold">Error updating user: ' . htmlspecialchars($conn->error) . '</p></div>';
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error updating user: ' . htmlspecialchars($conn->error) . '"); }); </script>';
     }
 }
 

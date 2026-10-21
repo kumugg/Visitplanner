@@ -4,5 +4,29 @@
         </footer>
         <script src="/visitplanner/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
         <script src="/visitplanner/js/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+        <script>
+                function triggerNotificationSuccess(message) {
+                        const toast = document.getElementById('toast');
+                        toast.innerHTML = message;
+                        toast.classList.add('show');
+                        toast.classList.add('success');
+                        setTimeout(() => {
+                        toast.classList.remove('show');
+                        toast.classList.remove('success');
+                        }, 3000);
+                }
+
+                function triggerNotificationFailed(message) {
+                        const toast = document.getElementById('toast');
+                        toast.innerHTML = message;
+                        toast.classList.add('show');
+                        toast.classList.add('error');
+                        setTimeout(() => {
+                        toast.classList.remove('show');
+                        toast.classList.remove('error');
+                        }, 3000);
+                }
+        </script>
     </body>
 </html>

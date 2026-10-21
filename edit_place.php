@@ -14,9 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->execute_query($sql, [$name, $description, $latitude, $longitude, $place_id]);
 
     if ($stmt) {
-        echo '<div class="container mt-4"><p class="fs-2 fw-semibold">Place updated successfully.</p></div>';
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place updated successfully!"); }); </script>';
     } else {
-        echo '<div class="container mt-4"><p class="fs-2 fw-semibold">Error updating place: ' . htmlspecialchars($conn->error) . '</p></div>';
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error updating place: ' . htmlspecialchars($conn->error) . '"); }); </script>';
     }
 }
 

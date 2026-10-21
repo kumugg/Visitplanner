@@ -30,12 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!in_array($selected_place_id, $_SESSION['visit_plan'])) {
             $_SESSION['visit_plan'][] = $selected_place_id;
             $is_added_to_vistiplan = true;
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place added to visit plan!"); }); </script>';
         }
     } else if ($action === 'remove') {
         if (($key = array_search($selected_place_id, $_SESSION['visit_plan']) == true)) {
             unset($_SESSION['visit_plan'][$key]);
             $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']); // Reindex the array
             $is_added_to_vistiplan = false;
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place removed from visit plan!"); }); </script>';
         }
     }
 }
