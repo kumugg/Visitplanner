@@ -1,7 +1,7 @@
 <?php
-include __DIR__ . '/includes/db.php';
-include __DIR__ . '/includes/header.php';
-include __DIR__ . '/includes/admins_only.php';
+include __DIR__ . '/../includes/db.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/admins_only.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $place_id = $_POST['place_id'];
@@ -72,3 +72,7 @@ if (!$place) {
         </div>
     </div>
 </div>
+
+<?php
+include __DIR__ . '/../includes/footer.php';
+?>

@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['user_type'] = $row['user_type'];
 
                 if ($row['user_type'] == 'admin') {
-                    header("Location: admin_dashboard.php");
+                    header("Location: ./admin/admin_dashboard.php");
                 } else {
-                    header("Location: my_visitplan.php");
+                    header("Location: my_visit_plan.php");
                 }
 
             } else {

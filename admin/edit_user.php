@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/db.php';
-include __DIR__ . '/includes/header.php';
-include __DIR__ . '/includes/admins_only.php';
+require_once __DIR__ . '/../includes/db.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/admins_only.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_POST['user_id'];
@@ -70,5 +70,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 <?php
-include __DIR__ . '/includes/footer.php';
+include __DIR__ . '/../includes/footer.php';
 ?>

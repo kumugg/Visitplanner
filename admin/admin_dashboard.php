@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/db.php';
-include __DIR__ . '/includes/header.php';
-include __DIR__ . '/includes/admins_only.php';
+require_once __DIR__ . '/../includes/db.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/admins_only.php';
 $page = "admin";
 ?>
 
@@ -25,5 +25,5 @@ $page = "admin";
 
 
 <?php 
-include __DIR__ . '/includes/footer.php';
+include __DIR__ . '/../includes/footer.php';
 ?>

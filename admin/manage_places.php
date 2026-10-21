@@ -1,7 +1,7 @@
 <?php
-include __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/includes/db.php';
-include __DIR__ . '/includes/admins_only.php';
+include __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/../includes/db.php';
+include __DIR__ . '/../includes/admins_only.php';
 $page = "manage_places";
 ?>
 
@@ -46,5 +46,5 @@ $page = "manage_places";
 </div>
 
 <?php
-include __DIR__ . '/includes/footer.php';
+include __DIR__ . '/../includes/footer.php';
 ?>

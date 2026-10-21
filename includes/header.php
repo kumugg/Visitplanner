@@ -41,7 +41,7 @@ session_start();
         <nav class="navbar navbar-expand-lg bg-<?= $theme_color ?>">
             <div class="container-md">
                 <!-- header logo text -->
-                <a href="index.php?category=all" class="navbar-brand text-light fw-semibold">Visit Planner System</a>
+                <a href="/visitplanner/index.php?category=all" class="navbar-brand text-light fw-semibold">Visit Planner System</a>
                 <!-- navbar mobile collapse button -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -51,20 +51,20 @@ session_start();
                     <ul class="navbar-nav ms-auto">
                         <!-- navbar tabs -->
                         <li class="nav-item">
-                            <a class="nav-link <?php echo ($page == 'places') ? 'active' : ''  ?> text-light" href="index.php?category=all">Places</a>
+                            <a class="nav-link <?php echo ($page == 'places') ? 'active' : ''  ?> text-light" href="/visitplanner/index.php?category=all">Places</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link <?php echo ($page == 'myvisitplan') ? 'active' : ''  ?> text-light" href="my_visit_plan.php">My Visit Plan</a>
+                            <a class="nav-link <?php echo ($page == 'myvisitplan') ? 'active' : ''  ?> text-light" href="/visitplanner/my_visit_plan.php">My Visit Plan</a>
                         </li>
                         <div class="ms-5 d-flex">
                             <li class="nav-item">
-                                <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="login.php" <?= $hide_login; ?>>Log In</a>
+                                <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="/visitplanner/login.php" <?= $hide_login; ?>>Log In</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="admin_dashboard.php" <?= $is_admin; ?>> Administration</a>
+                                <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="/visitplanner/admin/admin_dashboard.php" <?= $is_admin; ?>> Administration</a>
                             </li>
                             <li class="nav-item">
-                                <form action="logout.php" method="POST" class="d-inline">
+                                <form action="/visitplanner/logout.php" method="POST" class="d-inline">
                                     <button type="submit" class="nav-link text-light bg-transparent border-0" <?= $hide_logout; ?>> Log Out </button>
                                 </form>
                             </li>
