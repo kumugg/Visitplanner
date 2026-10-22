@@ -4,17 +4,20 @@ include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/admins_only.php';
 $page = "add_place";
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $place_name = $_POST['place_name'] ?? '';
     $place_description = $_POST['place_description'] ?? '';
+    $distance_km = $_POST['distance_km'] ?? '';
+    $opening_time = $_POST['opening_time'] ?? '';
+    $travel_tip = $_POST['travel_tip'] ?? '';
     $latitude = $_POST['latitude'] ?? '';
     $longitude = $_POST['longitude'] ?? '';
 
+    // Main validation check (kept the same as your original: name, description, lat, and long required)
     if (!empty($place_name) && !empty($place_description) && !empty($latitude) && !empty($longitude)) {
-        $sql = "INSERT INTO place (place_name, place_description, latitude, longitude) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO place (place_name, place_description, distance_km, opening_time, travel_tip, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
-            $result = $conn->execute_query($sql, [$place_name, $place_description, $latitude, $longitude]);
+            $result = $conn->execute_query($sql, [$place_name, $place_description, $distance_km, $opening_time, $travel_tip, $latitude, $longitude]);
 
             if ($result) {
                 echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place added successfully!"); }); </script>';
@@ -25,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error adding place: ' . htmlspecialchars($e->getMessage()) . '"); }); </script>';
         }
     } else {
-        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("All fields are required."); }); </script>';
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("All required fields must be filled."); }); </script>';
     }
 }
 
@@ -51,6 +54,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <textarea class="form-control" id="place_description" name="place_description" rows="3" required></textarea>
                         </div>
                         <div class="mb-3">
+                            <label for="distance_km" class="form-label">Distance (km)</label>
+                            <input type="text" class="form-control" id="distance_km" name="distance_km">
+                        </div>
+                        <div class="mb-3">
+                            <label for="travel_tip" class="form-label">Travel Tip</label>
+                            <textarea class="form-control" id="travel_tip" name="travel_tip" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="opening_time" class="form-label">Opening Time</label>
+                            <input type="text" class="form-control" id="opening_time" name="opening_time">
+                        </div>
+                        <div class="mb-3">
                             <label for="latitude" class="form-label">Latitude</label>
                             <input type="text" class="form-control" id="latitude" name="latitude" required>
                         </div>
@@ -64,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+</div>
 
 <?php
 include __DIR__ . '/../includes/footer.php';

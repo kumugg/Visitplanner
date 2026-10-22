@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place added to visit plan!"); }); </script>';
         }
     } else if ($action === 'remove') {
-        if (($key = array_search($selected_place_id, $_SESSION['visit_plan']) == true)) {
+        $key = array_search($selected_place_id, $_SESSION['visit_plan']);
+        if (($key !== false)) {
             unset($_SESSION['visit_plan'][$key]);
             $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']); // Reindex the array
             $is_added_to_vistiplan = false;
@@ -92,17 +93,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <p class="fs-1 fw-semibold lh-1"><?= $place_name; ?></p>
             <button type="button" class="btn btn-<?= $theme_color; ?> btn-sm" disabled><?= $category_name; ?></button>
             <p class="lead mt-4"><?= $place_description; ?></p>
-            <ul class="list-group list-group-flush ">
-                <li class="list-group-item">
-                    <p class="fs-6 lh-1"><b>Opeaning Times: </b><?= $opening_time; ?> </p>
-                </li>
-                <li class="list-group-item">
-                    <p class="fs-6 lh-1"><b>Travel Tips: </b><?= $travel_tip;?> </p>
-                </li>
-                <li class="list-group-item">
-                    <p class="fs-6 lh-1"><b>Distance from Pugoda: </b><?= $distance_km;?> </p>
-                </li>
-            </ul>
+            <table class="table table-borderless fs-6 lh-1 mb-0">
+                <tbody>
+                    <tr>
+                        <td class="fw-bold pb-4" style="width: 35%;">Opening Times:</td>
+                        <td class="pb-4 text-secondary"><?= $opening_time; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold pb-4">Travel Tips:</td>
+                        <td class="pb-4 text-secondary"><?= $travel_tip; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold pb-4">Distance from Pugoda:</td>
+                        <td class="pb-4 text-secondary"><?= $distance_km; ?> km</td>
+                    </tr>
+                </tbody>
+            </table>
             <form action="#" method="post">
                 <?php 
                  if (!$is_added_to_vistiplan) {

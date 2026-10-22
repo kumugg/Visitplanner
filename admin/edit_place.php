@@ -7,11 +7,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $place_id = $_POST['place_id'];
     $name = $_POST['place_name'];
     $description = $_POST['place_description'];
+    $opening_time = $_POST['opening_time'];
+    $distance_km = $_POST['distance_km'];
+    $travel_tip = $_POST['travel_tip']; // Added travel_tip
     $latitude = $_POST['latitude'];
     $longitude = $_POST['longitude'];
 
-    $sql = "UPDATE place SET place_name = ?, place_description = ?, latitude = ?, longitude = ? WHERE place_id = ?";
-    $stmt = $conn->execute_query($sql, [$name, $description, $latitude, $longitude, $place_id]);
+    // Added travel_tip = ? to the SQL query
+    $sql = "UPDATE place SET place_name = ?, place_description = ?, distance_km = ?, opening_time = ?, travel_tip = ?, latitude = ?, longitude = ? WHERE place_id = ?";
+    
+    // Added $travel_tip to the parameter array in the exact order as the SQL query
+    $stmt = $conn->execute_query($sql, [$name, $description, $distance_km, $opening_time, $travel_tip, $latitude, $longitude, $place_id]);
 
     if ($stmt) {
         echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place updated successfully!"); }); </script>';
@@ -67,7 +73,7 @@ if (!$place) {
                         </div>
                         <div class="mb-3">
                             <label for="opening_time" class="form-label">Opening Time</label>
-                            <input type="text" class="form-control" id="opening_time" name="opening_time" value="<?= htmlspecialchars($place['distance_km']); ?>" >
+                            <input type="text" class="form-control" id="opening_time" name="opening_time" value="<?= htmlspecialchars($place['opening_time']); ?>" >
                         </div>
                         <div class="mb-3">
                             <label for="latitude" class="form-label">Latitude</label>

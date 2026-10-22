@@ -42,7 +42,7 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
 <div class="container py-4">
     <div class="row g-4">
         <aside class="col-12 col-md-4">
-            <h2 class="mb-5">Place in My Visit Plan</h2>
+            <h2 class="mb-5">Places in My Visit Plan</h2>
             <?php if (empty($places)): ?>
                 <p class="text-muted">Your visit plan is empty.</p>
             <?php else: ?>
@@ -80,6 +80,17 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
             ];
         }, $places ?? [])), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
 
+        const defaultIcon = L.icon({
+            iconUrl: '/visitplanner/images/leaflet/marker-icon.png',
+            iconRetinaUrl: '/visitplanner/images/leaflet/marker-icon-2x.png',
+            shadowUrl: '/visitplanner/images/leaflet/marker-shadow.png',
+
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
         map = L.map('map').setView([6.9271, 79.8612], 8);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -101,7 +112,7 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
 
             const position = [place.latitude, place.longitude];
             
-            L.marker(position)
+            L.marker(position, {icon: defaultIcon })
                 .addTo(map)
                 .bindPopup('<a href="place_details.php?place_id=' + place.id + '">' +
                     escapeHtml(place.name) + '</a>');
