@@ -37,22 +37,13 @@ CREATE TABLE IF NOT EXISTS place (
 );
 
 CREATE TABLE IF NOT EXISTS visit_plan (
-    plan_id     INT AUTO_INCREMENT PRIMARY KEY,
-    user_id     INT,
-    -- session_id  VARCHAR(128) NOT NULL,
+    place_id     INT not null,
+    user_id     INT not null,
+    PRIMARY KEY (place_id, user_id),
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS visit_plan_item (
-    plan_id      INT NOT NULL,
-    place_id     INT NOT NULL,
-    order_index  INT NOT NULL DEFAULT 0,
-    PRIMARY KEY (plan_id, place_id),
-    FOREIGN KEY (plan_id) REFERENCES visit_plan(plan_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (place_id) REFERENCES place(place_id) ON DELETE CASCADE
 );
-
 -- =========================================================
 -- Categories
 -- =========================================================

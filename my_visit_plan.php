@@ -37,6 +37,47 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
     }
 }
 
+// Save user plan on database for cross device access
+if (isset($_GET['saveplan']) && $_GET['saveplan'] === "true") {
+    if (!empty($_SESSION['visit_plan']) && isset($_SESSION['logged_in_username'])) {
+        $sql = "SELECT user_id FROM users WHERE username = ?";
+        $row = $conn->execute_query($sql, [$_SESSION["logged_in_username"]])->fetch_assoc();
+
+        if ($row) {
+            $conn->begin_transaction();
+
+            try {
+                $user_id = $row['user_id'];
+                $place_ids = $_SESSION['visit_plan'];
+
+                $sql = 'DELETE FROM visit_plan WHERE user_id = ?';
+                $stmt = $conn->execute_query($sql, [$user_id]);
+
+                if($stmt) {
+                    $placeholders = implode(',', array_fill(0, count($place_ids), '(?, ?)'));
+                    $insert_sql = "INSERT IGNORE INTO visit_plan (user_id, place_id) VALUES {$placeholders}";
+
+                    // Flatten parameters into a single array: [user_id, place_id1, user_id, place_id2, ...]
+                    $params = [];
+                    foreach ($place_ids as $place_id) {
+                        $params[] = $user_id;
+                        $params[] = $place_id;
+                    }
+
+                    // Execute single query for all items
+                    $conn->execute_query($insert_sql, $params);
+                    $conn->commit();
+                    
+                    echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Visit plan saved successfully!"); }); </script>';
+                }
+            } catch (Exception $e) {
+                $conn->rollback();
+                echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error saving visit plan: ' . htmlspecialchars($e->getMessage()) . '"); </script>';
+            }
+        }
+    }
+}
+
 ?>
 
 <div class="container py-4">
@@ -60,6 +101,9 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
+            <?php if(!empty($places) && (isset($_SESSION['logged_in_username']))) : ?>
+                <a href="?saveplan=true" class="btn btn-md btn-outline-<?= $theme_color ?> mt-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="This text appears on hover!">Save Plan</a>
+            <?php endif; ?> 
         </aside>
         <section class="col-12 col-md-8 mt-5" aria-label="Map of visit plan places">
             <div id="map" style="height: 560px; width: 100%;"></div>

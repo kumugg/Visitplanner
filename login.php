@@ -22,6 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['logged_in_username'] = $username;
                 $_SESSION['user_type'] = $row['user_type'];
 
+                $sql = "SELECT vp.place_id FROM visit_plan vp INNER JOIN users u ON vp.user_id = u.user_id WHERE u.username = ?";
+                $result = $conn->execute_query($sql, [$username]);
+
+                if ($result && $result->num_rows > 0) {
+                    $rows = $result->fetch_all(MYSQLI_ASSOC);
+                    $_SESSION['visit_plan'] = array_column($rows, 'place_id');
+                } else {
+                    $_SESSION['visit_plan'] = [];
+                }
+
                 if ($row['user_type'] == 'admin') {
                     header("Location: ./admin/admin_dashboard.php");
                 } else {
