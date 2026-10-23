@@ -1,7 +1,7 @@
 <?php
+$page = "places";
 require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
-$page = "home";
 $category = $_GET['category'] ?? null;
 ?>
 

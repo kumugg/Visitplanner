@@ -25,6 +25,13 @@ if ($row) {
 
 // Handle adding a place to the visit plan
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     $action = $_POST['action'] ?? null;
 
     if ($action === 'add') {
@@ -110,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </tbody>
             </table>
             <form action="#" method="post">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <?php 
                  if (!$is_added_to_vistiplan) {
                     echo '<button type="submit" name="action" value="add" class="btn btn-outline-' . $theme_color . ' ms-3 mt-4"> Add to visit plan</button>';

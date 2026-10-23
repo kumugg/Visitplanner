@@ -1,7 +1,7 @@
 <?php
+$page = "login";
 include __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/db.php';
-$page = "login";
 $error_msg = '';
 
 // if user is already logged in, redirect to visit_plan.php
@@ -10,6 +10,13 @@ if(isset($_SESSION['logged_in_username'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     $username = $_POST['username'];
     $password = $_POST['password'];
 
@@ -60,15 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <form action="" method="post" id="loginForm">
+                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" name="username" required>
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label> <!-- Fixed typo: passoword -> password -->
+                            <label for="password" class="form-label">Password</label> 
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
-                        <button type="submit" class="btn btn-<?= $theme_color ?> w-100" id="submitBtn">Log In</button> <!-- Added w-100 for a full-width button -->
+                        <button type="submit" class="btn btn-<?= $theme_color ?> w-100" id="submitBtn">Log In</button>
                     </form>
                 </div>
             </div>

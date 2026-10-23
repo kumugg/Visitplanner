@@ -1,7 +1,7 @@
 <?php
+$page = "myvisitplan";
 require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
-$page = "map";
 $place_ids = array_values(array_unique(array_map('intval', $_SESSION['visit_plan'] ?? [])));        // Get the session array values by making it integer, unique and in order.
 $places_by_id = [];     // 0 => ['place_id' => 42, 'place_name' => 'Sigiriya', 'latitude' => 7.95, 'longitude' => 80.75] as array
 
@@ -22,7 +22,14 @@ foreach ($place_ids as $place_id) {
     }
 }
 
-if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
+if (($_SERVER['REQUEST_METHOD'] === 'POST') && isset($_GET['remove']) && ($_GET['remove'] === "true")) {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     $pid = (int) $_GET['place_id'];
 
     if (!empty($_SESSION['visit_plan'])) {
@@ -38,7 +45,14 @@ if (isset($_GET['place_id'], $_GET['remove']) && ($_GET['remove'] === "true")) {
 }
 
 // Save user plan on database for cross device access
-if (isset($_GET['saveplan']) && $_GET['saveplan'] === "true") {
+if (($_SERVER['REQUEST_METHOD'] === 'POST') && isset($_GET['saveplan']) && ($_GET['saveplan'] === "true")) {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     if (!empty($_SESSION['visit_plan']) && isset($_SESSION['logged_in_username'])) {
         $sql = "SELECT user_id FROM users WHERE username = ?";
         $row = $conn->execute_query($sql, [$_SESSION["logged_in_username"]])->fetch_assoc();
@@ -96,13 +110,16 @@ if (isset($_GET['saveplan']) && $_GET['saveplan'] === "true") {
                             <?php if ($place['latitude'] === null || $place['longitude'] === null): ?>
                                 <small class="d-block text-muted">Location coordinates not available</small>
                             <?php endif; ?>
-                            <a class="btn btn-sm btn-outline-danger float-end" href="?place_id=<?= htmlspecialchars($place['place_id']) ?>&remove=true">Remove</a>
+                            <form method="post" action="?place_id=<?= htmlspecialchars($place['place_id']) ?>&remove=true" class="d-inline"> <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>"> <button type="submit" class="btn btn-sm btn-outline-danger float-end">Remove</button> </form>
                         </li>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
             <?php if(!empty($places) && (isset($_SESSION['logged_in_username']))) : ?>
-                <a href="?saveplan=true" class="btn btn-md btn-outline-<?= $theme_color ?> mt-3">Save Plan</a>
+                <form method="post" action="?saveplan=true">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
+                    <button type="submit" class="btn btn-md btn-outline-<?= $theme_color ?> mt-3">Save Plan</button>
+                </form>
             <?php endif; ?> 
         </aside>
         <section class="col-12 col-md-8 mt-5" aria-label="Map of visit plan places">

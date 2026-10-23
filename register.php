@@ -1,8 +1,16 @@
 <?php
+$page = "register";
 require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+    
     // Trim input to prevent whitespace issues
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -46,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div class="row justify-content-center mt-3">
         <form action="#" method="POST" class="col-md-4 col-sm-6">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
             <div class="card shadow-sm border-0 p-4">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control mb-3" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required>
@@ -74,7 +83,7 @@ include __DIR__ . '/includes/footer.php';
         if (password !== confirmPassword) {
             event.preventDefault(); // Prevent submission
             if (typeof triggerNotificationFailed === "function") {
-                alert('Passwords do not match. Please try again.');
+                triggerNotificationFailed('Passwords do not match. Please try again.');
             } else {
                 alert('Passwords do not match. Please try again.');
             }
