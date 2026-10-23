@@ -102,10 +102,13 @@ if (isset($_GET['saveplan']) && $_GET['saveplan'] === "true") {
                 </ul>
             <?php endif; ?>
             <?php if(!empty($places) && (isset($_SESSION['logged_in_username']))) : ?>
-                <a href="?saveplan=true" class="btn btn-md btn-outline-<?= $theme_color ?> mt-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="This text appears on hover!">Save Plan</a>
+                <a href="?saveplan=true" class="btn btn-md btn-outline-<?= $theme_color ?> mt-3">Save Plan</a>
             <?php endif; ?> 
         </aside>
         <section class="col-12 col-md-8 mt-5" aria-label="Map of visit plan places">
+            <?php if (!isset($_SESSION['logged_in_username'])): ?>
+                <p class="small text-muted mt-2 mb-2">Please register to save your visit plan for cross device access.</p>
+            <?php endif; ?>
             <div id="map" style="height: 560px; width: 100%;"></div>
             <p id="map-message" class="small text-muted mt-2 mb-0" hidden>No visit plan places have map coordinates yet.</p>
         </section>

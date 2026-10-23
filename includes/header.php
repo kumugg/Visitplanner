@@ -56,19 +56,23 @@ session_start();
                         <li class="nav-item">
                             <a class="nav-link <?php echo ($page == 'myvisitplan') ? 'active' : ''  ?> text-light" href="/visitplanner/my_visit_plan.php">My Visit Plan</a>
                         </li>
-                        <div class="ms-5 d-flex">
-                            <li class="nav-item">
-                                <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="/visitplanner/login.php" <?= $hide_login; ?>>Log In</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="/visitplanner/admin/admin_dashboard.php" <?= $is_admin; ?>> Administration</a>
-                            </li>
-                            <li class="nav-item">
-                                <form action="/visitplanner/logout.php" method="POST" class="d-inline">
-                                    <button type="submit" class="nav-link text-light bg-transparent border-0" <?= $hide_logout; ?>> Log Out </button>
-                                </form>
-                            </li>
-                        </div>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <!-- navbar login/logout -->
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="/visitplanner/login.php" <?= $hide_login; ?>>Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="/visitplanner/register.php" <?= $hide_login; ?>>Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo ($page == 'admin') ? 'active' : ''  ?> text-light" href="/visitplanner/admin/admin_dashboard.php" <?= $is_admin; ?>> Administration</a>
+                        </li>
+                        <li class="nav-item">
+                            <form action="/visitplanner/logout.php" method="POST" class="d-inline">
+                                <button type="submit" class="nav-link text-light bg-transparent border-0" <?= $hide_logout; ?>> Log Out </button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
