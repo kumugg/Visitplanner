@@ -15,14 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id']) ) {
     
     $user_id = $_POST['user_id'];
 
-    // Delete the user from the database
-    $sql = "DELETE FROM users WHERE user_id = ?";
-    $result = $conn->execute_query($sql, [$user_id]);
-
-    if ($result) {
-        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User deleted successfully!"); }); </script>';
+    if ($user_id == 1) {
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Cannot delete the default admin user."); }); </script>';
     } else {
-        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error deleting user: ' . htmlspecialchars($conn->error) . '"); }); </script>';
+        // Delete the user from the database
+        $sql = "DELETE FROM users WHERE user_id = ?";
+        $result = $conn->execute_query($sql, [$user_id]);
+
+        if ($result) {
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User deleted successfully!"); }); </script>';
+        } else {
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error deleting user: ' . htmlspecialchars($conn->error) . '"); }); </script>';
+        }
     }
 }
 
@@ -44,17 +48,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id']) ) {
                         <thead>
                             <tr>
                                 <th scope="col">Username</th>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
                                 <th scope="col">User Type</th>
                                 <th scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
-                            $sql = "SELECT user_id, username, user_type FROM users";
+                            $sql = "SELECT user_id, username, first_name, last_name, user_type FROM users";
                             $result = $conn->execute_query($sql);
                             while ($row = $result->fetch_assoc()): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($row['username']); ?></td>
+                                    <td><?= htmlspecialchars($row['first_name'] ?? ''); ?></td>
+                                    <td><?= htmlspecialchars($row['last_name'] ?? ''); ?></td>
                                     <td><?= htmlspecialchars($row['user_type']  ); ?></td>
                                     <td>
                                         <a href="edit_user.php?user_id=<?= urlencode($row['user_id']); ?>" class="btn btn-sm btn-outline-primary">Edit</a>

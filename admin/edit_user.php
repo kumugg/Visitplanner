@@ -13,6 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $user_id = $_POST['user_id'] ?? null;
     $username = trim($_POST['username'] ?? '');
+    $first_name = trim($_POST['first_name'] ?? '');
+    $last_name = trim($_POST['last_name'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     $user_type = $_POST['user_type'] ?? '';
@@ -27,19 +29,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } 
     // If password input was provided, validate matching passwords
     elseif (!empty($password) || !empty($confirm_password)) {
+
         if ($password !== $confirm_password) {
             echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Passwords do not match. Please try again."); }); </script>';
         } else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "UPDATE users SET username = ?, password_hash = ?, user_type = ? WHERE user_id = ?";
-            $conn->execute_query($sql, [$username, $hashed_password, $user_type, $user_id]);
+            $sql = "UPDATE users SET username = ?, first_name = ?, last_name = ?, password_hash = ?, user_type = ? WHERE user_id = ?";
+            $conn->execute_query($sql, [$username, $first_name, $last_name, $hashed_password, $user_type, $user_id]);
             echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User and password updated successfully!"); }); </script>';
         }
     } 
     // Password fields left empty -> Update details only
     elseif (!empty($username) && !empty($user_type)) {
-        $sql = "UPDATE users SET username = ?, user_type = ? WHERE user_id = ?";
-        $conn->execute_query($sql, [$username, $user_type, $user_id]);
+        $sql = "UPDATE users SET username = ?, first_name = ?, last_name = ?, user_type = ? WHERE user_id = ?";
+        $conn->execute_query($sql, [$username, $first_name, $last_name, $user_type, $user_id]);
         echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User details updated successfully!"); }); </script>';
     }
 }
@@ -59,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php
                     if (isset($_GET['user_id'])) {
                         $user_id = $_GET['user_id'];
-                        $sql = "SELECT user_id, username, user_type FROM users WHERE user_id = ?";
+                        $sql = "SELECT user_id, username, first_name, last_name, user_type FROM users WHERE user_id = ?";
                         $result = $conn->execute_query($sql, [$user_id]);
                         $user = $result->fetch_assoc();
                         if ($user) {
@@ -70,6 +73,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Username</label>
                                     <input type="text" class="form-control" id="username" name="username" value="<?= htmlspecialchars($user['username']); ?>" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" value="<?= htmlspecialchars($user['first_name'] ?? ''); ?>" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" value="<?= htmlspecialchars($user['last_name'] ?? ''); ?>">
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>

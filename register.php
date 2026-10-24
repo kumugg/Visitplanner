@@ -12,6 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Trim input to prevent whitespace issues
+    $first_name = trim($_POST['first_name'] ?? '');
+    $last_name = trim($_POST['last_name'] ?? '');
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
@@ -26,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($row['count'] == 0) {
                 // Hash password and insert user
                 $password_hash = password_hash($password, PASSWORD_DEFAULT);
-                $insert_sql = "INSERT INTO users (username, password_hash, user_type) VALUES (?, ?, 'user')";
-                $insert_result = $conn->execute_query($insert_sql, [$username, $password_hash]);
+                $insert_sql = "INSERT INTO users (first_name, last_name, username, password_hash, user_type) VALUES (?, ?, ?, ?, 'user')";
+                $insert_result = $conn->execute_query($insert_sql, [$first_name, $last_name, $username, $password_hash]);
 
                 if ($insert_result) {
                     echo '<script>document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Registration successful! You can now log in."); });</script>';
@@ -56,6 +58,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form action="#" method="POST" class="col-md-4 col-sm-6">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
             <div class="card shadow-sm border-0 p-4">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" class="form-control mb-3" id="first_name" name="first_name" value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>" required>
+
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control mb-3" id="last_name" name="last_name" value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>">
+
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control mb-3" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required>
 
