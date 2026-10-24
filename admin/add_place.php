@@ -5,8 +5,16 @@ include __DIR__ . '/../includes/admins_only.php';
 $page = "add_place";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     $place_name = $_POST['place_name'] ?? '';
     $place_description = $_POST['place_description'] ?? '';
+    $category_id = $_POST['category'] ?? '';
     $distance_km = $_POST['distance_km'] ?? '';
     $opening_time = $_POST['opening_time'] ?? '';
     $travel_tip = $_POST['travel_tip'] ?? '';
@@ -14,10 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $longitude = $_POST['longitude'] ?? '';
 
     // Main validation check (kept the same as your original: name, description, lat, and long required)
-    if (!empty($place_name) && !empty($place_description) && !empty($latitude) && !empty($longitude)) {
-        $sql = "INSERT INTO place (place_name, place_description, distance_km, opening_time, travel_tip, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    if (!empty($place_name) && !empty($place_description) && !empty($category_id) && !empty($latitude) && !empty($longitude)) {
+        $sql = "INSERT INTO place (place_name, place_description, category_id, distance_km, opening_time, travel_tip, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            $result = $conn->execute_query($sql, [$place_name, $place_description, $distance_km, $opening_time, $travel_tip, $latitude, $longitude]);
+            $result = $conn->execute_query($sql, [$place_name, $place_description, $category_id, $distance_km, $opening_time, $travel_tip, $latitude, $longitude]);
 
             if ($result) {
                 echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place added successfully!"); }); </script>';
@@ -45,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <form action="#" method="post" id="addPlaceForm">
+                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                         <div class="mb-3">
                             <label for="place_name" class="form-label">Place Name</label>
                             <input type="text" class="form-control" id="place_name" name="place_name" required>
@@ -52,6 +61,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="mb-3">
                             <label for="place_description" class="form-label">Place Description</label>
                             <textarea class="form-control" id="place_description" name="place_description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Select a category</option>
+                                <?php
+                                $sql = "SELECT category_id, category_name FROM category";
+                                $result = $conn->execute_query($sql);
+                                while ($row = $result->fetch_assoc()): ?>
+                                    <option value="<?= htmlspecialchars($row['category_id']); ?>"><?= htmlspecialchars($row['category_name']); ?></option>
+                                <?php endwhile; ?>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="distance_km" class="form-label">Distance (km)</label>

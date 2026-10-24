@@ -6,6 +6,13 @@ include __DIR__ . '/../includes/admins_only.php';
 $page = "manage_users";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     $user_type = $_POST['user_type'] ?? '';
@@ -53,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <form action="#" method="post" id="addUserForm">
+                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" name="username" required>

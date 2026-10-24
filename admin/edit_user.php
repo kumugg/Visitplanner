@@ -4,6 +4,13 @@ include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/admins_only.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     $user_id = $_POST['user_id'];
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -46,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($user) {
                             ?>
                             <form action="#" method="post" id="editUserForm">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                 <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['user_id']); ?>">
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Username</label>

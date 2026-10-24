@@ -4,20 +4,37 @@ include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/admins_only.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+
     $place_id = $_POST['place_id'];
     $name = $_POST['place_name'];
     $description = $_POST['place_description'];
+    $category_id = $_POST['category'];
     $opening_time = $_POST['opening_time'];
     $distance_km = $_POST['distance_km'];
-    $travel_tip = $_POST['travel_tip']; // Added travel_tip
+    $travel_tip = $_POST['travel_tip'];
     $latitude = $_POST['latitude'];
     $longitude = $_POST['longitude'];
 
+
+    $sql = "SELECT * FROM category";
+    $category_result = $conn->execute_query($sql)->fetch_all(MYSQLI_ASSOC);
+
+    if ($category_id && !array_key_exists($category_id, array_column($category_result, 'category_id', 'category_name'))) {
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Invalid category selected."); }); </script>';
+        exit();
+    }
+
     // Added travel_tip = ? to the SQL query
-    $sql = "UPDATE place SET place_name = ?, place_description = ?, distance_km = ?, opening_time = ?, travel_tip = ?, latitude = ?, longitude = ? WHERE place_id = ?";
+    $sql = "UPDATE place SET place_name = ?, place_description = ?, category_id = ?, distance_km = ?, opening_time = ?, travel_tip = ?, latitude = ?, longitude = ? WHERE place_id = ?";
     
     // Added $travel_tip to the parameter array in the exact order as the SQL query
-    $stmt = $conn->execute_query($sql, [$name, $description, $distance_km, $opening_time, $travel_tip, $latitude, $longitude, $place_id]);
+    $stmt = $conn->execute_query($sql, [$name, $description, $category_id, $distance_km, $opening_time, $travel_tip, $latitude, $longitude, $place_id]);
 
     if ($stmt) {
         echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place updated successfully!"); }); </script>';
@@ -54,6 +71,7 @@ if (!$place) {
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <form action="#" method="post" id="editPlaceForm">
+                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                         <input type="hidden" name="place_id" value="<?= htmlspecialchars($place['place_id']); ?>">
                         <div class="mb-3">
                             <label for="place_name" class="form-label">Name</label>
@@ -62,6 +80,18 @@ if (!$place) {
                         <div class="mb-3">
                             <label for="place_description" class="form-label">Description</label>
                             <textarea class="form-control" id="place_description" name="place_description" rows="3" required><?= htmlspecialchars($place['place_description']); ?></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Select a category</option>
+                                <?php
+                                $sql = "SELECT category_id, category_name FROM category";
+                                $result = $conn->execute_query($sql);
+                                while ($row = $result->fetch_assoc()): ?>
+                                    <option value="<?= htmlspecialchars($row['category_id']); ?>" <?= ($row['category_id'] == $place['category_id']) ? 'selected' : ''; ?>><?= htmlspecialchars($row['category_name']); ?></option>
+                                <?php endwhile; ?>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="distance_km" class="form-label">Distance (km)</label>

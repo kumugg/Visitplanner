@@ -5,8 +5,15 @@ include __DIR__ . '/../includes/admins_only.php';
 $page = "manage_users";
 
 
-if (isset($_GET['user_id']) && $_GET['delete'] === 'true') {
-    $user_id = $_GET['user_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id']) ) {
+
+    $user_token = $_POST['csrf_token'] ?? '';
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+    
+    $user_id = $_POST['user_id'];
 
     // Delete the user from the database
     $sql = "DELETE FROM users WHERE user_id = ?";
@@ -51,7 +58,11 @@ if (isset($_GET['user_id']) && $_GET['delete'] === 'true') {
                                     <td><?= htmlspecialchars($row['user_type']  ); ?></td>
                                     <td>
                                         <a href="edit_user.php?user_id=<?= urlencode($row['user_id']); ?>" class="btn btn-sm btn-outline-primary">Edit</a>
-                                        <a href="#?user_id=<?= urlencode($row['user_id']); ?>&delete=true" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                        <form action="#" method="post" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                            <input type="hidden" name="user_id" value="<?= htmlspecialchars($row['user_id']); ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
