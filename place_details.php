@@ -3,6 +3,14 @@ require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
 $page = "place_details";
 
+$category_name     = '';
+$image_path        = '';
+$place_name        = '';
+$place_description = '';
+$opening_time      = '';
+$travel_tip        = '';
+$distance_km       = '';
+
 $selected_place_id = $_GET['place_id'] ?? null;
 $is_added_to_vistiplan = in_array($selected_place_id, $_SESSION['visit_plan']);
 

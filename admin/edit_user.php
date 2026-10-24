@@ -11,26 +11,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Invalid CSRF token.');
     }
 
-    $user_id = $_POST['user_id'];
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $user_id = $_POST['user_id'] ?? null;
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $user_type = $_POST['user_type'] ?? '';
 
-    if (!empty($password)) {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "UPDATE users SET username = ?, password_hash = ? WHERE user_id = ?";
-        $stmt = $conn->execute_query($sql, [$username, $hashed_password, $user_id]);
-    } else {
-        $sql = "UPDATE users SET username = ? WHERE user_id = ?";
-        $stmt = $conn->execute_query($sql, [$username, $user_id]);
-    }
+    // Check if duplicate username exists for another user
+    $sql = "SELECT COUNT(*) as count FROM users WHERE username = ? AND user_id != ?";
+    $result = $conn->execute_query($sql, [$username, $user_id]);
+    $row = $result->fetch_assoc();
 
-    if ($stmt) {
-        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User updated successfully!"); }); </script>';
-    } else {
-        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Error updating user: ' . htmlspecialchars($conn->error) . '"); }); </script>';
+    if ($row['count'] > 0) {
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Username already exists. Please choose a different username."); }); </script>';
+    } 
+    // If password input was provided, validate matching passwords
+    elseif (!empty($password) || !empty($confirm_password)) {
+        if ($password !== $confirm_password) {
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Passwords do not match. Please try again."); }); </script>';
+        } else {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $sql = "UPDATE users SET username = ?, password_hash = ?, user_type = ? WHERE user_id = ?";
+            $conn->execute_query($sql, [$username, $hashed_password, $user_type, $user_id]);
+            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User and password updated successfully!"); }); </script>';
+        }
+    } 
+    // Password fields left empty -> Update details only
+    elseif (!empty($username) && !empty($user_type)) {
+        $sql = "UPDATE users SET username = ?, user_type = ? WHERE user_id = ?";
+        $conn->execute_query($sql, [$username, $user_type, $user_id]);
+        echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("User details updated successfully!"); }); </script>';
     }
 }
-
 ?>
 
 <div class="container py-5">
@@ -47,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php
                     if (isset($_GET['user_id'])) {
                         $user_id = $_GET['user_id'];
-                        $sql = "SELECT user_id, username FROM users WHERE user_id = ?";
+                        $sql = "SELECT user_id, username, user_type FROM users WHERE user_id = ?";
                         $result = $conn->execute_query($sql, [$user_id]);
                         $user = $result->fetch_assoc();
                         if ($user) {
@@ -62,6 +74,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password if you want to change it">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="user_type" class="form-label">User Type</label>
+                                    <select class="form-control" id="user_type" name="user_type" required>
+                                        <option value="user" <?= ($user['user_type'] === 'user') ? 'selected' : '' ?>>User</option>
+                                        <option value="admin" <?= ($user['user_type'] === 'admin') ? 'selected' : '' ?>>Admin</option>
+                                    </select>
                                 </div>
                                 <button type="submit" class="btn btn-<?= $theme_color ?> w-100">Update User</button>
                             </form>
