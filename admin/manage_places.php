@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_id'])) {
                         </thead>
                         <tbody>
                             <?php
-                            $sql = "SELECT place_id, place_name FROM place";
+                            $sql = "SELECT place_id, place_name FROM place ORDER BY place_name ASC";
                             $result = $conn->execute_query($sql);
                             while ($row = $result->fetch_assoc()): ?>
                                 <tr>

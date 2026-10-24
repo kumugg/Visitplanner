@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sql = "SELECT * FROM category";
     $category_result = $conn->execute_query($sql)->fetch_all(MYSQLI_ASSOC);
 
-    if ($category_id && !array_key_exists($category_id, array_column($category_result, 'category_id', 'category_name'))) {
+    if ($category_id && !in_array($category_id, array_column($category_result, 'category_id'))) {
         echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Invalid category selected."); }); </script>';
         exit();
     }
