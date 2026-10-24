@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $travel_tip = $_POST['travel_tip'];
     $latitude = $_POST['latitude'];
     $longitude = $_POST['longitude'];
+    $image_path = $_POST['image_path'];
 
 
     $sql = "SELECT * FROM category";
@@ -31,10 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Added travel_tip = ? to the SQL query
-    $sql = "UPDATE place SET place_name = ?, place_description = ?, category_id = ?, distance_km = ?, opening_time = ?, travel_tip = ?, latitude = ?, longitude = ? WHERE place_id = ?";
+    $sql = "UPDATE place SET place_name = ?, place_description = ?, category_id = ?, distance_km = ?, opening_time = ?, travel_tip = ?, latitude = ?, longitude = ?, image_path = ? WHERE place_id = ?";
     
     // Added $travel_tip to the parameter array in the exact order as the SQL query
-    $stmt = $conn->execute_query($sql, [$name, $description, $category_id, $distance_km, $opening_time, $travel_tip, $latitude, $longitude, $place_id]);
+    $stmt = $conn->execute_query($sql, [$name, $description, $category_id, $distance_km, $opening_time, $travel_tip, $latitude, $longitude, $image_path, $place_id]);
 
     if ($stmt) {
         echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place updated successfully!"); }); </script>';
@@ -112,6 +113,10 @@ if (!$place) {
                         <div class="mb-3">
                             <label for="longitude" class="form-label">Longitude</label>
                             <input type="text" class="form-control" id="longitude" name="longitude" value="<?= htmlspecialchars($place['longitude']); ?>" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="image_path" class="form-label">Image URL: <small class="form-text text-muted">Enter the relative path of the images folder in the server. Ex: images/anods/</small></label>
+                            <input type="text" class="form-control" id="image_path" name="image_path" value="<?= htmlspecialchars($place['image_path']); ?>" >
                         </div>
                         <button type="submit" class="btn btn-<?= $theme_color ?> w-100">Update Place</button>
                     </form>
