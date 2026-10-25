@@ -1,5 +1,6 @@
-<!-- This file should include after including the header file on required file.  -->
+<!-- This file should be included after including the header file on restricted admin pages. -->
 <?php if (empty($_SESSION['user_type']) || $_SESSION['user_type'] !== 'admin') : ?>
+    <?php http_response_code(403); ?>
     <div class="container py-4">
         <div class="row g-4">
             <div class="col-12">
@@ -8,6 +9,6 @@
             </div>
         </div>
     </div>
-    <?php include __DIR__ . "/footer.php";?>
+    <?php include __DIR__ . "/footer.php"; ?>
     <?php exit(); ?>
 <?php endif; ?>

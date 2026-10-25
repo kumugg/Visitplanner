@@ -8,26 +8,27 @@
         <script>
                 function triggerNotificationSuccess(message) {
                         const toast = document.getElementById('toast');
-                        toast.innerHTML = message;
+                        if (!toast) return;
+                        toast.textContent = message;
                         toast.classList.add('show');
                         toast.classList.add('success');
                         setTimeout(() => {
-                        toast.classList.remove('show');
-                        toast.classList.remove('success');
+                                toast.classList.remove('show');
+                                toast.classList.remove('success');
                         }, 3000);
                 }
 
                 function triggerNotificationFailed(message) {
                         const toast = document.getElementById('toast');
-                        toast.innerHTML = message;
+                        if (!toast) return;
+                        toast.textContent = message;
                         toast.classList.add('show');
                         toast.classList.add('error');
                         setTimeout(() => {
-                        toast.classList.remove('show');
-                        toast.classList.remove('error');
+                                toast.classList.remove('show');
+                                toast.classList.remove('error');
                         }, 3000);
                 }
         </script>
     </body>
-    <?php $page_name = $page ?? ''; ?>
 </html>

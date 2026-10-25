@@ -1,59 +1,69 @@
 <?php
-$page = "login";
-include __DIR__ . '/includes/header.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/includes/db.php';
-$error_msg = '';
 
-// if user is already logged in, redirect to visit_plan.php
-if(isset($_SESSION['logged_in_username'])) {
-    header("Location: visit_plan.php");
+// If user is already logged in, redirect to my_visit_plan.php
+if (isset($_SESSION['logged_in_username'])) {
+    if (!empty($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin') {
+        header("Location: ./admin/admin_dashboard.php");
+    } else {
+        header("Location: my_visit_plan.php");
+    }
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$notification_js = '';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_token = $_POST['csrf_token'] ?? '';
     if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
         http_response_code(403);
         exit('Invalid CSRF token.');
     }
 
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
 
     if (!empty($username) && !empty($password)) {
-        $sql = "SELECT password_hash, user_type FROM users WHERE username = ? LIMIT 1";
+        $sql = "SELECT user_id, password_hash, user_type FROM users WHERE username = ? LIMIT 1";
         $result = $conn->execute_query($sql, [$username]);
+        $row = $result ? $result->fetch_assoc() : null;
 
-        if (!empty($row = $result->fetch_assoc())) {
-            if (password_verify($password, $row['password_hash'])) {
-                $_SESSION['logged_in_username'] = $username;
-                $_SESSION['user_type'] = $row['user_type'];
+        if ($row && password_verify($password, $row['password_hash'])) {
+            // Prevent session fixation
+            session_regenerate_id(true);
 
-                $sql = "SELECT vp.place_id FROM visit_plan vp INNER JOIN users u ON vp.user_id = u.user_id WHERE u.username = ?";
-                $result = $conn->execute_query($sql, [$username]);
+            $_SESSION['logged_in_username'] = $username;
+            $_SESSION['user_type'] = $row['user_type'];
 
-                if ($result && $result->num_rows > 0) {
-                    $rows = $result->fetch_all(MYSQLI_ASSOC);
-                    $_SESSION['visit_plan'] = array_column($rows, 'place_id');
-                } else {
-                    $_SESSION['visit_plan'] = [];
-                }
+            $vp_sql = "SELECT place_id FROM visit_plan WHERE user_id = ?";
+            $vp_result = $conn->execute_query($vp_sql, [$row['user_id']]);
 
-                if ($row['user_type'] == 'admin') {
-                    header("Location: ./admin/admin_dashboard.php");
-                } else {
-                    header("Location: my_visit_plan.php");
-                }
-
+            if ($vp_result && $vp_result->num_rows > 0) {
+                $rows = $vp_result->fetch_all(MYSQLI_ASSOC);
+                $_SESSION['visit_plan'] = array_map('intval', array_column($rows, 'place_id'));
             } else {
-                echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Invalid username or password."); }); </script>';
+                $_SESSION['visit_plan'] = [];
             }
-        
+
+            if ($row['user_type'] === 'admin') {
+                header("Location: ./admin/admin_dashboard.php");
+            } else {
+                header("Location: my_visit_plan.php");
+            }
+            exit();
         } else {
-            echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationFailed("Invalid username or password."); }); </script>';
+            $notification_js = 'triggerNotificationFailed(' . json_encode("Invalid username or password.") . ');';
         }
+    } else {
+        $notification_js = 'triggerNotificationFailed(' . json_encode("Please enter both username and password.") . ');';
     }
 }
+
+$page = "login";
+include __DIR__ . '/includes/header.php';
 ?>
 
 <div class="container py-5">
@@ -67,16 +77,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <form action="" method="post" id="loginForm">
-                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <input type="text" class="form-control" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autofocus>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label> 
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
-                        <button type="submit" class="btn btn-<?= $theme_color ?> w-100" id="submitBtn">Log In</button>
+                        <button type="submit" class="btn btn-<?= htmlspecialchars($theme_color) ?> w-100" id="submitBtn">Log In</button>
                     </form>
                 </div>
             </div>
@@ -87,3 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <?php 
 include __DIR__ . '/includes/footer.php';   
 ?>
+
+<?php if (!empty($notification_js)): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        <?= $notification_js ?>
+    });
+</script>
+<?php endif; ?>
