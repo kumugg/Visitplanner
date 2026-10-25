@@ -154,7 +154,7 @@ foreach ($place_ids as $place_id) {
         </aside>
         <section class="col-12 col-md-8 mt-4 mt-md-0" aria-label="Map of visit plan places">
             <?php if (!isset($_SESSION['logged_in_username'])): ?>
-                <p class="small text-muted mb-2">Tip: <a href="login.php">Log in</a> or <a href="register.php">register</a> to save your visit plan for access across devices.</p>
+                <p class="small text-muted mb-2">Please register to save your visit plan for cross device access.</p>
             <?php endif; ?>
             <div id="map" style="height: 560px; width: 100%; border-radius: 8px;"></div>
             <p id="map-message" class="small text-muted mt-2 mb-0" hidden>No visit plan places have map coordinates yet.</p>
