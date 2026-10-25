@@ -141,10 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="image_path" class="form-label">Image URL: <small class="form-text text-muted">Enter the relative path of the images folder in the server. Ex: images/anods/</small></label>
                             <input type="text" class="form-control" id="image_path" name="image_path" value="<?= htmlspecialchars($form_values['image_path']); ?>" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="image_path" class="form-label">Image URL: <small class="form-text text-muted">Enter the relative path of the images folder in the server. Ex: images/anods/</small></label>
-                            <input type="text" class="form-control" id="image_path" name="image_path" required>
-                        </div>
                         <button type="submit" class="btn btn-<?= $theme_color ?> w-100">Add Place</button>
                     </form>
                 </div>
