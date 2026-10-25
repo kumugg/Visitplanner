@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="container py-5">
+    <a href="manage_users.php" class="btn btn-<?= $theme_color ?> mt-3">&laquo; Back to Manage Users</a>
     <div class="row justify-content-center mb-5">
         <div class="col-md-6 text-center">
             <h1 class="h3 fw-bold">Add Users</h1>

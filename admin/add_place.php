@@ -20,12 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $travel_tip = $_POST['travel_tip'] ?? '';
     $latitude = $_POST['latitude'] ?? '';
     $longitude = $_POST['longitude'] ?? '';
+    $image_path = $_POST['image_path'] ?? '';
 
     // Main validation check (kept the same as your original: name, description, lat, and long required)
-    if (!empty($place_name) && !empty($place_description) && !empty($category_id) && !empty($latitude) && !empty($longitude)) {
-        $sql = "INSERT INTO place (place_name, place_description, category_id, distance_km, opening_time, travel_tip, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    if (!empty($place_name) && !empty($place_description) && !empty($category_id) && !empty($latitude) && !empty($longitude) && !empty($image_path)) {
+        $sql = "INSERT INTO place (place_name, place_description, category_id, distance_km, opening_time, travel_tip, latitude, longitude, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            $result = $conn->execute_query($sql, [$place_name, $place_description, $category_id, $distance_km, $opening_time, $travel_tip, $latitude, $longitude]);
+            $result = $conn->execute_query($sql, [$place_name, $place_description, $category_id, $distance_km, $opening_time, $travel_tip, $latitude, $longitude, $image_path]);
 
             if ($result) {
                 echo '<script> document.addEventListener("DOMContentLoaded", function() { triggerNotificationSuccess("Place added successfully!"); }); </script>';
@@ -43,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="container py-5">
+    <a href="manage_places.php" class="btn btn-<?= $theme_color ?> mt-3">&laquo; Back to Manage Places</a>
     <div class="row justify-content-center mb-5">
         <div class="col-md-6 text-center">
             <h1 class="h3 fw-bold">Add Place</h1>
@@ -93,6 +95,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="mb-3">
                             <label for="longitude" class="form-label">Longitude</label>
                             <input type="text" class="form-control" id="longitude" name="longitude" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image_path" class="form-label">Image URL: <small class="form-text text-muted">Enter the relative path of the images folder in the server. Ex: images/anods/</small></label>
+                            <input type="text" class="form-control" id="image_path" name="image_path" required>
                         </div>
                         <button type="submit" class="btn btn-<?= $theme_color ?> w-100">Add Place</button>
                     </form>

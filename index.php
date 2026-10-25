@@ -12,7 +12,9 @@ $category = $_GET['category'] ?? null;
         $user = $conn->execute_query($sql, [$_SESSION['logged_in_username']])->fetch_assoc();
         $first_name = htmlspecialchars($user['first_name'] ?? '');
         echo "<p class=\"h1 fw-bold text-" . $theme_color . " py-5\" style=\"font-family: 'Roboto', sans-serif;\">Hi, " . $first_name . "! The Places Google Maps Forgot - Now All in One Spot</p>";    
-    }
+    } else {
+        echo "<p class=\"h1 fw-bold text-" . $theme_color . " py-5\" style=\"font-family: 'Roboto', sans-serif;\">The Places Google Maps Forgot - Now All in One Spot</p>";
+     }
     ?>  
     <a href="?category=all" class="btn btn-outline-<?= $theme_color; ?> mb-5">All</a>
 
