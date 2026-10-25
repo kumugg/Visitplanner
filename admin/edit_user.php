@@ -133,10 +133,14 @@ if (!$user) {
                         </div>
                         <div class="mb-3">
                             <label for="user_type" class="form-label">User Type</label>
-                            <select class="form-control" id="user_type" name="user_type" required>
+                            <select class="form-control" id="user_type" name="user_type" required <?= ((int)$user['user_id'] === 1) ? 'disabled' : '' ?>>
                                 <option value="user" <?= ($user['user_type'] === 'user') ? 'selected' : '' ?>>User</option>
                                 <option value="admin" <?= ($user['user_type'] === 'admin') ? 'selected' : '' ?>>Admin</option>
                             </select>
+                            <?php if ((int)$user['user_id'] === 1): ?>
+                                <input type="hidden" name="user_type" value="admin">
+                                <small class="text-muted">The default admin role cannot be changed.</small>
+                            <?php endif; ?>
                         </div>
                         <button type="submit" class="btn btn-<?= $theme_color ?> w-100">Update User</button>
                     </form>
