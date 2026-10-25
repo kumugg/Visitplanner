@@ -58,6 +58,7 @@ $selected_category = strtolower($category);
                     <div class="card h-100">
                         <img src="<?= $image_path; ?>" class="card-img-top" alt="Image of <?= $place_name; ?>" style="height: 200px; object-fit: cover;">
                         <div class="card-body d-flex flex-column">
+                            <span class="badge bg-secondary mb-2 align-self-start"><?= htmlspecialchars($row['category_name']); ?></span>
                             <h5 class="card-title"><?= $place_name; ?> </h5>
                             <p class="card-text"><?= $place_description; ?></p>
                             <a href="place_details.php?place_id=<?= $place_id; ?>" class="btn btn-outline-<?= htmlspecialchars($theme_color); ?> mt-auto">View Details</a>
