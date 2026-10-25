@@ -1,5 +1,5 @@
 <?php
-$page = "manage_users";
+require_once __DIR__ . '/../includes/db.php';
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/admins_only.php';
 
@@ -30,10 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $notification_js = 'triggerNotificationFailed(' . json_encode("The default admin user role cannot be changed.") . ');';
     } elseif (!in_array($user_type, ['admin', 'user'], true)) {
         $notification_js = 'triggerNotificationFailed(' . json_encode("Invalid user type selected.") . ');';
-    } elseif (mb_strlen($username) < 3 || mb_strlen($username) > 50) {
-        $notification_js = 'triggerNotificationFailed(' . json_encode("Username must be between 3 and 50 characters.") . ');';
-    } elseif (mb_strlen($first_name) > 50 || mb_strlen($last_name) > 50) {
-        $notification_js = 'triggerNotificationFailed(' . json_encode("First and last names cannot exceed 50 characters.") . ');';
     } else {
         // Check if duplicate username exists for another user
         $sql = "SELECT COUNT(*) as count FROM users WHERE username = ? AND user_id != ?";
@@ -43,9 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($row['count'] > 0) {
             $notification_js = 'triggerNotificationFailed(' . json_encode("Username already exists. Please choose a different username.") . ');';
         } elseif (!empty($password) || !empty($confirm_password)) {
-            if (strlen($password) < 6) {
-                $notification_js = 'triggerNotificationFailed(' . json_encode("Password must be at least 6 characters long.") . ');';
-            } elseif ($password !== $confirm_password) {
+            if ($password !== $confirm_password) {
                 $notification_js = 'triggerNotificationFailed(' . json_encode("Passwords do not match. Please try again.") . ');';
             } else {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -63,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
 
-                    $notification_js = 'triggerNotificationSuccess(' . json_encode("User details and password updated successfully!") . ');';
+                    $notification_js = 'triggerNotificationSuccess(' . json_encode("User and password updated successfully!") . ');';
                 } catch (Exception $e) {
                     error_log("Error updating user: " . $e->getMessage());
                     $notification_js = 'triggerNotificationFailed(' . json_encode("Database error occurred while updating user.") . ');';
@@ -104,7 +98,7 @@ if (!$user) {
 ?>
 
 <div class="container py-5">
-    <a href="manage_users.php" class="btn btn-<?= htmlspecialchars($theme_color) ?> mt-3">&laquo; Back to Manage Users</a>
+    <a href="manage_users.php" class="btn btn-<?= $theme_color ?> mt-3">&laquo; Back to Manage Users</a>
     <div class="row justify-content-center mb-5">
         <div class="col-md-6 text-center">
             <h1 class="h3 fw-bold">Edit User</h1>
@@ -116,13 +110,13 @@ if (!$user) {
                 <div class="card-body p-4">
                     <form action="edit_user.php?user_id=<?= (int)$user['user_id'] ?>" method="post" id="editUserForm">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-                        <input type="hidden" name="user_id" value="<?= (int)$user['user_id']; ?>">
+                        <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['user_id']); ?>">
                         <div class="mb-3">
-                            <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                            <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" name="username" value="<?= htmlspecialchars($user['username']); ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                            <label for="first_name" class="form-label">First Name</label>
                             <input type="text" class="form-control" id="first_name" name="first_name" value="<?= htmlspecialchars($user['first_name'] ?? ''); ?>" required>
                         </div>
                         <div class="mb-3">
@@ -131,24 +125,20 @@ if (!$user) {
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" minlength="6" placeholder="Enter new password to change it">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password if you want to change it">
                         </div>
                         <div class="mb-3">
                             <label for="confirm_password" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="6" placeholder="Confirm new password">
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
                         </div>
                         <div class="mb-3">
-                            <label for="user_type" class="form-label">User Type <span class="text-danger">*</span></label>
-                            <select class="form-select" id="user_type" name="user_type" required <?= ((int)$user['user_id'] === 1) ? 'disabled' : '' ?>>
+                            <label for="user_type" class="form-label">User Type</label>
+                            <select class="form-control" id="user_type" name="user_type" required>
                                 <option value="user" <?= ($user['user_type'] === 'user') ? 'selected' : '' ?>>User</option>
                                 <option value="admin" <?= ($user['user_type'] === 'admin') ? 'selected' : '' ?>>Admin</option>
                             </select>
-                            <?php if ((int)$user['user_id'] === 1): ?>
-                                <input type="hidden" name="user_type" value="admin">
-                                <small class="text-muted">The default admin role cannot be modified.</small>
-                            <?php endif; ?>
                         </div>
-                        <button type="submit" class="btn btn-<?= htmlspecialchars($theme_color) ?> w-100">Update User</button>
+                        <button type="submit" class="btn btn-<?= $theme_color ?> w-100">Update User</button>
                     </form>
                 </div>
             </div>

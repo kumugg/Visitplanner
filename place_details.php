@@ -1,15 +1,32 @@
 <?php
-$page = "place_details";
+require_once __DIR__ . '/includes/db.php';
 include __DIR__ . '/includes/header.php';
+$page = "place_details";
+
+$category_name     = '';
+$image_path        = '';
+$place_name        = '';
+$place_description = '';
+$opening_time      = '';
+$travel_tip        = '';
+$distance_km       = '';
 
 $selected_place_id = isset($_GET['place_id']) ? (int) $_GET['place_id'] : 0;
-$notification_js = '';
+$notification_js   = '';
 
-$sql = "SELECT p.place_id, p.place_name, p.place_description, p.opening_time, p.travel_tip, p.distance_km, p.image_path, c.category_name FROM place p INNER JOIN category c ON c.category_id = p.category_id WHERE p.place_id = ? LIMIT 1";
+$sql = "SELECT p.place_name, p.place_description, p.opening_time, p.travel_tip, p.distance_km, p.image_path, c.category_name FROM place p INNER JOIN category c ON c.category_id = p.category_id WHERE p.place_id = ? LIMIT 1";
 $result = $conn->execute_query($sql, [$selected_place_id]);
-$place = $result ? $result->fetch_assoc() : null;
+$row = $result ? $result->fetch_assoc() : null;
 
-if (!$place) {
+if ($row) {
+    $place_name        = htmlspecialchars($row['place_name']);
+    $place_description = htmlspecialchars($row['place_description']);
+    $opening_time      = htmlspecialchars($row['opening_time'] ?? 'Not Applicable');
+    $travel_tip        = htmlspecialchars($row['travel_tip'] ?? 'None');
+    $distance_km       = htmlspecialchars($row['distance_km'] ?? 'N/A');
+    $image_path        = $row['image_path'] ?? '';
+    $category_name     = htmlspecialchars($row['category_name']);
+} else {
     echo '<div class="container py-5 text-center">
             <h2 class="mb-4">Place Not Found</h2>
             <p class="text-muted">The requested place could not be found or has been removed.</p>
@@ -19,19 +36,7 @@ if (!$place) {
     exit();
 }
 
-// Fetch multiple categorized travel tips per SRS REQ-3.3
-$tips_result = $conn->execute_query("SELECT tip_category, tip_text FROM travel_tip WHERE place_id = ? ORDER BY tip_id ASC", [$selected_place_id]);
-$travel_tips = $tips_result ? $tips_result->fetch_all(MYSQLI_ASSOC) : [];
-
-$place_name        = htmlspecialchars($place['place_name']);
-$place_description = htmlspecialchars($place['place_description']);
-$opening_time      = htmlspecialchars($place['opening_time'] ?? 'Not Applicable');
-$fallback_tip      = htmlspecialchars($place['travel_tip'] ?? 'None');
-$distance_km       = htmlspecialchars($place['distance_km'] ?? 'N/A');
-$image_path        = $place['image_path'] ?? '';
-$category_name     = htmlspecialchars($place['category_name']);
-
-// Handle adding/removing from visit plan
+// Handle adding a place to the visit plan
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_token = $_POST['csrf_token'] ?? '';
     if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $user_token)) {
@@ -59,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $key = array_search($selected_place_id, $_SESSION['visit_plan'], true);
         if ($key !== false) {
             unset($_SESSION['visit_plan'][$key]);
-            $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']);
+            $_SESSION['visit_plan'] = array_values($_SESSION['visit_plan']); // Reindex the array
             
             // Sync with DB if user is logged in
             if (!empty($_SESSION['logged_in_username'])) {
@@ -74,20 +79,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$is_added_to_visitplan = in_array($selected_place_id, $_SESSION['visit_plan'], true);
+$is_added_to_vistiplan = in_array($selected_place_id, $_SESSION['visit_plan'], true);
 ?>
 
 <div class="container-xxl">
     <div class="row">
-        <a href="index.php?category=<?= urlencode(strtolower($place['category_name'])); ?>" class="btn btn-outline-<?= htmlspecialchars($theme_color); ?> btn-sm col-auto mt-4 mb-3">&laquo; Back to <?= $category_name; ?> Category </a>
+        <a href="index.php?category=<?= urlencode(strtolower($row['category_name'])); ?>" class="btn btn-outline-<?= $theme_color; ?> btn-sm col-auto mt-4 mb-3">&laquo; Back to <?= $category_name; ?> Category </a>
     </div>
     <div class="row">
-        <div class="col-12 col-md-6 my-4">
+        <div class="col-6 my-4">
             <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
                     <?php
                     $allowed_extension = ['webp', 'jpg', 'jpeg', 'png'];
-                    $carousel_images = [];
+                    $count = 0;
                     $dir_to_check = '';
 
                     if (!empty($image_path)) {
@@ -102,32 +107,23 @@ $is_added_to_visitplan = in_array($selected_place_id, $_SESSION['visit_plan'], t
                         $iterator = new FilesystemIterator($dir_to_check, FilesystemIterator::SKIP_DOTS);
                         foreach ($iterator as $fileinfo) {
                             if ($fileinfo->isFile()) {
-                                $ext = strtolower($fileinfo->getExtension());
-                                if (in_array($ext, $allowed_extension, true)) {
-                                    $carousel_images[] = rtrim($image_path, '/') . '/' . $fileinfo->getFilename();
+                                $filename = $fileinfo->getFilename();
+                                $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+                                if (in_array($extension, $allowed_extension, true)) {
+                                    $webpath = rtrim($image_path, '/') . '/' . $filename;
+                                    $active_cls = ($count < 1) ? ' active' : '';
+                                    echo '<div class="carousel-item' . $active_cls . '"> <img src="' . htmlspecialchars($webpath) . '" class="d-block w-100" alt="Image of ' . $place_name . '"> </div>';
+                                    $count++;
                                 }
                             }
                         }
-                        sort($carousel_images);
                     }
-
-                    if (empty($carousel_images)) {
-                        echo '<div class="carousel-item active">
-                                <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 350px;">
-                                    <span>No images available</span>
-                                </div>
-                              </div>';
-                    } else {
-                        foreach ($carousel_images as $idx => $img_src) {
-                            $active_cls = ($idx === 0) ? ' active' : '';
-                            echo '<div class="carousel-item' . $active_cls . '">
-                                    <img src="' . htmlspecialchars($img_src) . '" class="d-block w-100 rounded" alt="Image of ' . $place_name . '" style="max-height: 400px; object-fit: cover;">
-                                  </div>';
-                        }
+                    if ($count === 0) {
+                        echo '<div class="carousel-item active"> <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 350px;"><span>No images available</span></div> </div>';
                     }
                     ?>
                 </div>
-                <?php if (count($carousel_images) > 1): ?>
                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
@@ -136,62 +132,38 @@ $is_added_to_visitplan = in_array($selected_place_id, $_SESSION['visit_plan'], t
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>
-                <?php endif; ?>
             </div>
         </div>
-        <div class="col-12 col-md-6 my-2">
+        <div class="col-6 my-2">
             <p class="fs-1 fw-semibold lh-1"><?= $place_name; ?></p>
-            <span class="badge bg-<?= htmlspecialchars($theme_color); ?> fs-6"><?= $category_name; ?></span>
+            <button type="button" class="btn btn-<?= $theme_color; ?> btn-sm" disabled><?= $category_name; ?></button>
             <p class="lead mt-4"><?= $place_description; ?></p>
-            <table class="table table-borderless fs-6 mb-0">
+            <table class="table table-borderless fs-6 lh-1 mb-0">
                 <tbody>
                     <tr>
-                        <td class="fw-bold pb-3" style="width: 30%;">Opening Times:</td>
-                        <td class="pb-3 text-secondary"><?= $opening_time; ?></td>
+                        <td class="fw-bold pb-4" style="width: 35%;">Opening Times:</td>
+                        <td class="pb-4 text-secondary"><?= $opening_time; ?></td>
                     </tr>
                     <tr>
-                        <td class="fw-bold pb-3" style="width: 30%;">Distance from Pugoda:</td>
-                        <td class="pb-3 text-secondary"><?= $distance_km; ?> km</td>
+                        <td class="fw-bold pb-4">Travel Tips:</td>
+                        <td class="pb-4 text-secondary"><?= $travel_tip; ?></td>
                     </tr>
                     <tr>
-                        <td class="fw-bold pb-3 align-top" style="width: 30%;">Travel Tips:</td>
-                        <td class="pb-3 text-secondary">
-                            <?php if (!empty($travel_tips)): ?>
-                                <ul class="list-unstyled mb-0">
-                                    <?php foreach ($travel_tips as $tip): 
-                                        $badge_class = 'bg-secondary';
-                                        if ($tip['tip_category'] === 'entry-fee status') {
-                                            $badge_class = 'bg-info text-dark';
-                                        } elseif ($tip['tip_category'] === 'safety/what-to-bring') {
-                                            $badge_class = 'bg-warning text-dark';
-                                        } elseif ($tip['tip_category'] === 'best-time-to-visit') {
-                                            $badge_class = 'bg-success';
-                                        }
-                                    ?>
-                                        <li class="mb-2">
-                                            <span class="badge <?= $badge_class ?> me-1"><?= htmlspecialchars(ucwords(str_replace(['-', '/'], [' ', ' / '], $tip['tip_category']))); ?></span>
-                                            <span><?= htmlspecialchars($tip['tip_text']); ?></span>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php elseif (!empty($fallback_tip) && $fallback_tip !== 'None'): ?>
-                                <span><?= $fallback_tip; ?></span>
-                            <?php else: ?>
-                                <span class="text-muted">No travel tips currently available.</span>
-                            <?php endif; ?>
-                            <small class="text-muted d-block mt-2 fst-italic">Note: Conditions, accessibility, and entry fees may vary; please verify on-site.</small>
-                        </td>
+                        <td class="fw-bold pb-4">Distance from Pugoda:</td>
+                        <td class="pb-4 text-secondary"><?= $distance_km; ?> km</td>
                     </tr>
                 </tbody>
             </table>
-            <form action="" method="post" class="mt-4">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
-                <?php if (!$is_added_to_visitplan): ?>
-                    <button type="submit" name="action" value="add" class="btn btn-outline-<?= htmlspecialchars($theme_color); ?>">Add to visit plan</button>
-                <?php else: ?>
-                    <button type="submit" name="action" value="remove" class="btn btn-outline-danger">Remove from visit plan</button>
-                <?php endif; ?>
-                <a href="my_visit_plan.php" class="btn btn-outline-<?= htmlspecialchars($theme_color) ?> ms-3">View on Map</a>
+            <form action="#" method="post">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <?php 
+                 if (!$is_added_to_vistiplan) {
+                    echo '<button type="submit" name="action" value="add" class="btn btn-outline-' . $theme_color . ' ms-3 mt-4"> Add to visit plan</button>';
+                 } else {
+                    echo '<button type="submit" name="action" value="remove" class="btn btn-outline-' . $theme_color . ' ms-3 mt-4"> Remove from visit plan</button>';
+                 }
+                 ?>
+                <a href="my_visit_plan.php" class="btn btn-outline-<?= $theme_color ?> ms-4 mt-4"> View on Map</a>
             </form>
         </div>
     </div>

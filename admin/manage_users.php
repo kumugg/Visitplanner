@@ -1,7 +1,8 @@
 <?php
-$page = "manage_users";
+require_once __DIR__ . '/../includes/db.php';
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/admins_only.php';
+$page = "manage_users";
 
 $notification_js = '';
 
@@ -12,37 +13,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         exit('Invalid CSRF token.');
     }
     
-    $user_id = (int) $_POST['user_id'];
+    $user_id = $_POST['user_id'];
 
-    if ($user_id === 1) {
+    if ($user_id == 1) {
         $notification_js = 'triggerNotificationFailed(' . json_encode("Cannot delete the default admin user.") . ');';
     } else {
-        // Prevent deleting currently logged in admin user
-        $curr_res = $conn->execute_query("SELECT user_id FROM users WHERE username = ? LIMIT 1", [$_SESSION['logged_in_username'] ?? '']);
-        $curr_user = $curr_res ? $curr_res->fetch_assoc() : null;
-
-        if ($curr_user && (int)$curr_user['user_id'] === $user_id) {
-            $notification_js = 'triggerNotificationFailed(' . json_encode("You cannot delete your own account while logged in.") . ');';
-        } else {
-            $sql = "DELETE FROM users WHERE user_id = ?";
-            try {
-                $result = $conn->execute_query($sql, [$user_id]);
-                if ($result) {
-                    $notification_js = 'triggerNotificationSuccess(' . json_encode("User deleted successfully!") . ');';
-                } else {
-                    $notification_js = 'triggerNotificationFailed(' . json_encode("Error deleting user.") . ');';
-                }
-            } catch (Exception $e) {
-                error_log("Error deleting user: " . $e->getMessage());
-                $notification_js = 'triggerNotificationFailed(' . json_encode("Database error occurred while deleting user.") . ');';
+        // Delete the user from the database
+        $sql = "DELETE FROM users WHERE user_id = ?";
+        try {
+            $result = $conn->execute_query($sql, [$user_id]);
+            if ($result) {
+                $notification_js = 'triggerNotificationSuccess(' . json_encode("User deleted successfully!") . ');';
+            } else {
+                $notification_js = 'triggerNotificationFailed(' . json_encode("Error deleting user: " . $conn->error) . ');';
             }
+        } catch (Exception $e) {
+            error_log("Error deleting user: " . $e->getMessage());
+            $notification_js = 'triggerNotificationFailed(' . json_encode("Error deleting user: " . $e->getMessage()) . ');';
         }
     }
 }
 ?>
 
 <div class="container py-5">
-    <a href="admin_dashboard.php" class="btn btn-<?= htmlspecialchars($theme_color) ?> mt-3">&laquo; Back to Dashboard</a>
+    <a href="admin_dashboard.php" class="btn btn-<?= $theme_color ?> mt-3">&laquo; Back to Dashboard</a>
     <div class="row justify-content-center mb-5">
         <div class="col-md-6 text-center">
             <h1 class="h3 fw-bold mt-4">Manage Users</h1>
@@ -52,36 +46,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         <div class="col-md-8 col-sm-10">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
-                    <a href="add_user.php" class="btn btn-<?= htmlspecialchars($theme_color) ?> w-100 mb-3">Add New User</a>
-                    <table class="table table-striped table-hover align-middle">
+                    <a href="add_user.php" class="btn btn-<?= $theme_color ?> w-100 mb-3">Add New User</a>
+                    <table class="table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th scope="col">Username</th>
                                 <th scope="col">First Name</th>
                                 <th scope="col">Last Name</th>
                                 <th scope="col">User Type</th>
-                                <th scope="col" class="text-end">Actions</th>
+                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
-                            $sql = "SELECT user_id, username, first_name, last_name, user_type FROM users ORDER BY user_id ASC";
+                            $sql = "SELECT user_id, username, first_name, last_name, user_type FROM users";
                             $result = $conn->execute_query($sql);
                             while ($row = $result->fetch_assoc()): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($row['username']); ?></td>
                                     <td><?= htmlspecialchars($row['first_name'] ?? ''); ?></td>
                                     <td><?= htmlspecialchars($row['last_name'] ?? ''); ?></td>
-                                    <td><span class="badge bg-<?= ($row['user_type'] === 'admin') ? 'primary' : 'secondary'; ?>"><?= htmlspecialchars($row['user_type']); ?></span></td>
-                                    <td class="text-end">
-                                        <a href="edit_user.php?user_id=<?= (int)$row['user_id']; ?>" class="btn btn-sm btn-outline-primary">Edit</a>
-                                        <?php if ((int)$row['user_id'] !== 1): ?>
+                                    <td><?= htmlspecialchars($row['user_type']); ?></td>
+                                    <td>
+                                        <a href="edit_user.php?user_id=<?= urlencode($row['user_id']); ?>" class="btn btn-sm btn-outline-primary">Edit</a>
                                         <form action="#" method="post" style="display:inline;">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
-                                            <input type="hidden" name="user_id" value="<?= (int)$row['user_id']; ?>">
+                                            <input type="hidden" name="user_id" value="<?= htmlspecialchars($row['user_id']); ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</button>
                                         </form>
-                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
